@@ -1,4 +1,4 @@
-# Aplicación para admintrar prodcutos
+# Aplicación para administrar productos
 
 ### Descripcíon
 Esta aplicación permite a los usuarios registrarse y agregar información adicional sobre su perfil, como nombre y apellido. Además, permite gestionar productos de manera completa: registrar, actualizar, listar y eliminar productos. La aplicación también soporta la publicación de URLs de imágenes, las cuales se muestran en la sección de detalles de cada producto para proporcionar información visual adicional.
