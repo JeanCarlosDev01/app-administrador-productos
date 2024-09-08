@@ -1,0 +1,64 @@
+{% extends 'account/dashboard.html' %}
+{% load static %}
+
+{% block section %}
+{% if messages %}
+{% for msg in messages %}
+<div class="m-auto col-5 mt-2 alert alert-primary text-center" role="alert">
+    <i class="bi bi-info-circle"></i> {{ msg }}
+</div>
+{% endfor %}
+{% endif %}
+
+<h1 class="text-center">Lista de productos </h1>
+<table class="table table-hover mt-3">
+    <thead>
+        <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Nombre</th>
+            <th scope="col">Categoria</th>
+            <th scope="col">Stock</th>
+            <th scope="col">precio</th>
+            <th scope="col">Opciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in product_list %}
+        <tr>
+            <th scope="row">{{ product.id }}</th>
+            <td>{{ product.name }}</td>
+            <td>{{ product.category.name }}</td>
+            <td>{{ product.stock }}</td>
+            <td>{{ product.price }}</td>
+            <td class="d-flex flex-row">
+                <a href="{% url 'product-details' product.id %}" class="mx-1 btn btn-primary" title="Detalles"><i class="bi bi-info-square"></i></i></a>
+                <a href="{% url 'product-edit' product.id %}" class="mx-1 btn btn-success" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                <button type="button" class="btn btn-danger mx-1" name="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#confirmDelete" onclick="confirmDelete(this)">
+                    <i class="bi bi-trash3"></i>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="confirmDelete" tabindex="-1" aria-labelledby="confirmDelete" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel"><i class="bi bi-exclamation-triangle"></i> Eliminar Producto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Esta seguro que desea eliminar el producto?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancelar</button>
+                <a id="btn-delete" href="#" class="btn btn-danger"><i class="bi bi-trash3"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'confirm_delete.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends 'account/base_dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<div class="d-flex justify-content-center row mt-5">
+    <h1 class="text-center">Agregar información</h1>
+    <div class="col-sm-12 col-md-9 col-lg-4 mt-2 p-2">
+        <form action="{% url 'account-settings' %}" class="card needs-validation m-2 p-2" method="post" novalidate>
+            {% csrf_token %}
+            <div class="">
+                <label for="username" class="form-label text-center">Nombre de usuario</label>
+                <input type="text" name="username" class="form-control" value="{{ username }}"
+                    pattern="^(?=.*[a-zA-Z]{3,})[a-zA-Z\d]{3,}$" id="username"" placeholder=" Nombre de usuario"
+                    required>
+                <div class="invalid-feedback">
+                    Minimo 5 caracteres
+                </div>
+            </div>
+            <div class="">
+                <label for="firstname" class="form-label text-center">Nombre</label>
+                <input type="text" name="firstname" class="form-control" value="{{ firstname }}"
+                    pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$" id="firstname" placeholder="EJ: Juan Pablo" required>
+                <div class="invalid-feedback">
+                    No agregar numeros ni caracteres especiales
+                </div>
+            </div>
+            <div class="">
+                <label for="lastname" class="form-label text-center">Apellido</label>
+                <input type="text" name="lastname" class="form-control" value="{{ lastname }}"
+                    pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$" id="lastname" placeholder="Ej: Martinez Torres" required>
+                <div class="invalid-feedback">
+                    No agregar numeros ni caracteres especiales
+                </div>
+            </div>
+            <div class="">
+                <label for="email" class="form-label">Correo electrónico</label>
+                <input type="email" name="email" class="form-control" disabled id="email" value="{{ email }}">
+            </div>
+            <input type="submit" class="w-100 btn btn-primary mt-3" id="btn-submit" value="Agregar">
+        </form>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center row mt-5">
+    <h1 class="text-center">Cambiar contraseña</h1>
+    <div class="col-sm-12 col-md-9 col-lg-4 mt-2 p-2">
+        <form action="{% url 'change-password' %}" method="post" class="card needs-validation m-2 p-2"
+            id="password-form" novalidate>
+            {% csrf_token %}
+            <label for="password" class="form-label">Nueva contraseña</label>
+            <div class="input-group mb-3">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Contraseña"
+                    aria-label="Contraseña" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$" required>
+                <button class="btn btn-primary" type="button" id="view-password" onclick="viewPassword(this)"><i
+                        class="bi bi-eye-slash"></i></button>
+                <div class="invalid-feedback">
+                    Minimo 8 caracteres (0-9)(a-z)(A-Z)
+                </div>
+            </div>
+            <label for="password" class="form-label">Confirmar Contraseña</label>
+            <div class="input-group">
+                <input type="password" name="confirm-password" id="confirm-password" class="form-control"
+                    placeholder="Contraseña" aria-label="Contraseña"
+                    pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$" required>
+                <button class="btn btn-primary" type="button" id="view-password" onclick="viewPassword(this)"><i
+                        class="bi bi-eye-slash"></i></button>
+                <div class="invalid-feedback">
+                    Minimo 8 caracteres (0-9)(a-z)(A-Z)
+                </div>
+            </div>
+            <div class="text-danger" id="psw-msg" hidden>
+                Las contraseñas son diferentes
+            </div>
+            <input type="submit" class="w-100 btn btn-primary mt-3" id="btn-submit" value="Cambiar contraseña">
+        </form>
+    </div>
+</div>
+<script src="{% static 'verify_password.js' %}"></script>
+{% endblock %}

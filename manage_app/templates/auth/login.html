@@ -1,0 +1,43 @@
+{% extends 'auth/base_template.html' %}
+{% load static %}
+
+{% block content %}
+{% if error %}
+<div class="m-auto col-5 mt-2 alert alert-danger" role="alert">
+    {{ error }}
+</div>
+{% endif %}
+
+<h1 class="text-center mt-5">Iniciar sesión</h1>
+<div class="d-flex justify-content-center row">
+    <div class="col-sm-12 col-md-9 col-lg-4">
+        <form action="{% url 'login' %}" method="post" class="card needs-validation mt-5 mx-2 p-2" id="login-form"
+            novalidate>
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo electrónico</label>
+                <input type="email" name="username" class="form-control" id="email" placeholder="example@email.com"
+                    pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required>
+                <div class="invalid-feedback">
+                    Correo electrónico invalido
+                </div>
+            </div>
+            <label for="password" class="form-label">Contraseña</label>
+            <div class="input-group mb-3">
+                <input type="password" name="password" id="password" class="form-control" placeholder="Contraseña"
+                    aria-label="Contraseña" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$" required>
+                <button class="btn btn-primary" type="button" id="view-password" onclick="viewPassword(this)"><i
+                        class="bi bi-eye-slash"></i></button>
+                <div class="invalid-feedback">
+                    Minimo 8 caracteres (0-9)(a-z)(A-Z)
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary" form="login-form">Ingresar</button>
+        </form>
+        <div class="d-flex justify-content-center mt-3">
+            <a class="btn btn-outline-secondary mx-auto" href="{% url 'signup' %}">Crear cuenta</a>
+        </div>
+    </div>
+</div>
+<!-- <script src="{% static 'main.js' %}"></script> -->
+{% endblock %}

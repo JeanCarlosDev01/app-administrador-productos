@@ -1,0 +1,108 @@
+{% extends 'account/dashboard.html' %}
+{% load static %}
+
+{% block section %}
+<link rel="stylesheet" href="{% static 'css/styles.css' %}">
+{% if messages %}
+{% for msg in messages %}
+<div class="m-auto col-5 mt-2 alert alert-primary text-center" role="alert">
+    <i class="bi bi-info-circle"></i> {{ msg }}
+</div>
+{% endfor %}
+{% endif %}
+<h1 class="text-center mb-3">Buscar producto</h1>
+<div class="row px-3">
+    <form method="post" id="search-form" class="d-flex flex-row">
+        {% csrf_token %}
+        <div class="col-3 p-1">
+            <p class="text-center mb-1">Filtrar por categoria</p>
+            <select class="form-select px-5 mb-3" name="category" id="inputGroupSelectCategory" required>
+                <option value="0">Todos</option>
+                {% for category in categories %}
+                <option value={{category.id}}>{{ category.name }}</option>
+                {% endfor %}
+            </select>
+            <p class="text-center mb-1">Filtrar por precio</p>
+            <div class="d-flex flex-row justify-content-center">
+                <div class="w-50">
+                    <p for="minorPrice" class="text-start p-0 m-0">Menor</p>
+                    <input type="range" name="min-price" class="form-range w-100" id="minorPrice"
+                        value="{{ range_min.min }}" step="1" min="{{ range_min.min }}" max="{{ range_min.max }}">
+                </div>
+                <div class="w-50">
+                    <p for="major" class="text-end p-0 m-0">Mayor</p>
+                    <input type="range" name="max-price" class="form-range w-100" id="majorPrice"
+                        value="{{ range_max.max }}" step="1" min="{{ range_max.min }}" max="{{ range_max.max }}">
+                </div>
+            </div>
+            <div class="d-flex flex-row justify-content-between">
+                <p id="minorValue">{{ range_min.min }}</p>
+                <p id="majorValue">{{ range_max.max }}</p>
+            </div>
+        </div>
+        <div class="col-6 px-3 p-1">
+            <p class="text-start mb-1">Filtrar por ID/Nombre</p>
+            <div class="row">
+                <div class="col-9 p-0 d-flex flex-row gap-1">
+                    <input type="text" name="input-search" id="input-search" class="form-control ms-2"
+                        placeholder="ID/Nombre del producto" aria-label="Nombre" aria-describedby="addon-wrapping">
+                    <button type="submit" class="btn btn-secondary" form="search-form"><i
+                            class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div class="container">
+    <table class="table table-hover mt-3">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nombre</th>
+                <th scope="col">Categoria</th>
+                <th scope="col">Stock</th>
+                <th scope="col">precio</th>
+                <th scope="col">Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in product_list %}
+            <tr>
+                <th scope="row">{{ product.id }}</th>
+                <td>{{ product.name }}</td>
+                <td>{{ product.category.name }}</td>
+                <td>{{ product.stock }}</td>
+                <td>{{ product.price }}</td>
+                <td class="d-flex flex-row">
+                    <a href="{% url 'product-details' product.id %}" target="_blank" class="mx-1 btn btn-primary" title="Detalles"><i class="bi bi-info-square"></i></i></a>
+                    <a href="{% url 'product-edit' product.id %}" target="_blank" class="mx-1 btn btn-success" title="Editar"><i class="bi bi-pencil-square"></i></a>
+                    <button type="button" class="btn btn-danger mx-1" name="{{ product.id }}" data-bs-toggle="modal" data-bs-target="#confirmDelete" onclick="confirmDelete(this)">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+<!-- Modal -->
+<div class="modal fade" id="confirmDelete" tabindex="-1" aria-labelledby="confirmDelete" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel"><i class="bi bi-exclamation-triangle"></i> Eliminar Producto</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ¿Esta seguro que desea eliminar el producto?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cancelar</button>
+                <a id="btn-delete" href="#" class="btn btn-danger"><i class="bi bi-trash3"></i></a>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="{% static 'confirm_delete.js' %}"></script>
+<script src="{% static 'search_inputs.js' %}"></script>
+{% endblock %}

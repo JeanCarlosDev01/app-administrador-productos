@@ -1,0 +1,125 @@
+{% extends 'account/dashboard.html' %}
+{% load static %}
+
+{% block section %}
+{% if messages %}
+    {% for msg in messages %}
+        <div class="m-auto col-5 mt-2 alert alert-primary text-center" role="alert">
+            <i class="bi bi-info-circle"></i> {{ msg }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<h1 class="text-center p-2">Registro de productos</h1>
+<div class="container-fluid">
+    <form method="post" id="register-product">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label for="InputName" class="form-label">Nombre</label>
+            <input type="text" class="form-control" maxlength="200" name="name" id="InputName" aria-describedby="nameHelp"
+                placeholder="Nombre del producto" required>
+        </div>
+        <label for="InputName" class="form-label">Categoria</label>
+        <div class="mb-3 d-flex">
+            <div>
+                <select class="form-select px-5" name="category" id="inputGroupSelectCategory" required>
+                    {% for category in categories %}
+                    <option value={{category.id}}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <!-- Button add category modal -->
+            <button type="button" class="btn btn-outline-primary mx-2" data-bs-toggle="modal"
+                data-bs-target="#form-category">
+                Agregar categoria
+            </button>
+        </div>
+        <div class="mb-3">
+            <label for="inputStock" class="form-label">Stock</label>
+            <input type="number" class="form-control" min="1" name="stock" id="inputStock" aria-describedby="stock"
+                placeholder="Cantidad disponible para la venta" required>
+        </div>
+        <div class="mb-3">
+            <label for="inputPrice" class="form-label">Precio</label>
+            <input type="number" class="form-control" min="1" name="price" id="inputPrice" aria-describedby="price"
+                placeholder="Precio del producto" required>
+        </div>
+        <div class="mb-3 d-flex">
+            <!-- Button load images modal -->
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#form-images-container">
+                Agreagar imagenes
+            </button>
+            <i class="bi bi-file-earmark-check text-success" id="images-check" hidden style="font-size: 1.4em;"></i>
+            <input type="text" name="images" class="form-control" hidden id="url-text">
+        </div>
+        <div class="mb-3">
+            <label class="form-label" for="descriptionTextarea">Descripción</label>
+            <textarea form="register-product" class="form-control" name="description"
+                placeholder="Descripción del producto" id="descriptionTextarea" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success mt-2 px-5">Registrar</button>
+    </form>
+
+    <!-- Modal load images -->
+    <div class="modal fade" id="form-images-container" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+        aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="staticBackdropLabel">Cargar URLS</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-warning text-center"><i class="bi bi-exclamation-triangle"></i> Acontinuación solo
+                        debes cargar
+                        la url de las imagenes</p>
+                    <form id="form-images" >
+                        <div class="mb-3">
+                            <button style="border: none;" class="p-0 m-1" onclick="deleteInput(this)"><i class="bi bi-x-square text-danger"></i></button>
+                            <label for="inputUrl" class="form-label">Imagen</label>
+                            <input type="url" class="form-control" name="image" id="inputUrl"
+                                aria-describedby="url" placeholder="https://imagen1.jpg (png, webp ...)">
+                        </div>
+                    </form>
+                    <button type="button" class="btn btn-outline-primary" onclick="addUrl()"><i class="bi bi-plus-lg"></i></button>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-success" form="form-images" data-bs-dismiss="modal">Cargar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal  add category-->
+    <div class="modal fade" id="form-category" tabindex="-1" aria-labelledby="form-category" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="exampleModalLabel">Agregar categoria</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form action="{% url 'add-category' %}" method="post" class="needs-validation" id="add-category" novalidate>
+                        {% csrf_token %}
+                        <label for="category" class="form-label">Nombre</label>
+                        <input type="text" class="form-control" name="category" id="category" pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                            placeholder="Nombre de la categoria">
+                        <div class="invalid-feedback">
+                            Usa solo una palabra clave - 
+                            Que no este registrada - 
+                            Sin espacios - 
+                            Sin caracteres especiales - 
+                            Sin numeros 
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="submit" class="btn btn-success" form="add-category">Agregar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="{% static 'add_product_validation.js' %}"></script>
+    {% endblock %}

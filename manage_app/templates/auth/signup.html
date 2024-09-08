@@ -1,0 +1,49 @@
+{% extends 'auth/base_template.html' %}
+{% load static %}
+
+{% block content %}
+
+{% if error %}
+<div class="m-auto col-5 mt-2 alert alert-danger" role="alert">
+  {{ error }}
+</div>
+{% endif %}
+
+<h1 class="text-center mt-2">Registrar</h1>
+<div class="d-flex justify-content-center row">
+  <div class="col-sm-12 col-md-9 col-lg-4">
+    <form action="{% url 'signup' %}" method="post" class="card needs-validation my-5 mx-2 p-2" id="signup-form" novalidate>
+      {% csrf_token %}
+      <div class="">
+        <label for="username" class="form-label text-center">Nombre de usuario</label>
+        <input type="text" name="username" class="form-control" pattern="^(?=.*[a-zA-Z]{3,})[a-zA-Z\d]{3,}$"
+          id="username"" placeholder=" Nombre de usuario" required>
+        <div class="invalid-feedback">
+          Minimo 5 caracteres
+        </div>
+      </div>
+      <div class="">
+        <label for="email" class="form-label">Correo electrónico</label>
+        <input type="email" name="email" class="form-control" id="email" placeholder="example@email.com"
+          pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required>
+        <div class="invalid-feedback">
+          Dirección de correo invalida
+        </div>
+        <label for="password" class="form-label">Contraseña</label>
+        <div class="input-group">
+          <input type="password" name="password" id="password" class="form-control" placeholder="Contraseña"
+            aria-label="Contraseña" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$" required>
+          <button class="btn btn-primary" type="button" id="view-password" onclick="viewPassword(this)"><i
+              class="bi bi-eye-slash"></i></button>
+          <div class="invalid-feedback">
+            Minimo 8 caracteres (0-9)(a-z)(A-Z)
+          </div>
+        </div>
+        <button type="submit" class="w-100 btn btn-primary mt-3" form="signup-form" id="btn-submit">Registrar</button>
+    </form>
+  </div>
+  <div class="d-flex justify-content-center mt-3">
+    <a class="btn btn-outline-secondary mx-auto" href="{% url 'login' %}">Ya tengo una cuenta</a>
+  </div>
+</div>
+{% endblock %}

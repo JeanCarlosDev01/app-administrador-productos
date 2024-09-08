@@ -1,0 +1,20 @@
+{% extends 'account/base_dashboard.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid d-flex justify-content-between p-0">
+    <div class="bg-light col-2">
+        <ul class="list-group list-group-flush  py-2">
+            <li class="list-group-item list-group-item-action"><a href="{% url 'add-product' %}" class="text-decoration-none text-secondary">Registrar producto</a></li>
+            <li class="list-group-item list-group-item-action"><a href="{% url 'product-list' %}" class="text-decoration-none text-secondary">Lista productos</a></li>
+            <li class="list-group-item list-group-item-action"><a href="{% url 'product-search' %}" class="text-decoration-none text-secondary">Buscar producto</a></li>
+        </ul>
+    </div>
+    <div class="p-1 col-10">
+        <div class="container-fluid bg-light p-2 rounded-1">
+            {% block section %}
+            {% endblock %}
+        </div>
+    </div>
+</div>
+{% endblock %}
