@@ -1,0 +1,41 @@
+{% extends 'store_base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/store-styles.css' %}">
+<section class="container-fluid position-relative home-section p-0 d-flex justify-content-center align-items-center">
+    <img class="header-img img-fluid position-absolute start-0 top-0 z-n1 opacity-75"
+        src="{% static 'imgs/header-background.webp' %}" alt="background image">
+    <form action="{% url 'search' %}" method="post">
+        {% csrf_token %} 
+        <div class="input-group mb-3">
+            <input type="text" name="input-search" class="form-control border border-primary" placeholder="Buscar.."
+                aria-label="Buscar" aria-describedby="button-search">
+            <button class="btn btn-primary" type="submit" id="button-search"><i
+                    class="bi bi-search"></i></button>
+        </div>
+    </form>
+</section>
+<section class="container py-5">
+    <h1 class="text-center">Categorias</h1>
+    <div class="d-flex flex-wrap justify-content-center pt-2">
+        {% for category in categories %}
+        <div class="card m-2 p-2 text-center shadow-sm" style="width: 18rem;">
+            <a href="{% url 'search-category' category.id %}" class="text-decoration-none fw-bold text-secondary">{{ category.name }}</a>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+<section class="container pb-5">
+    <h2 class="text-center">Sobre nosotros</h2>
+    <p class="mt-4 text-center">
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit, hic adipisci. Assumenda, blanditiis
+        aspernatur accusantium alias quae voluptatum, aliquam enim eveniet expedita sed doloremque rerum excepturi
+        itaque. Vitae dolorem maiores laudantium fuga saepe aut eligendi rerum nulla, omnis obcaecati totam quaerat esse
+        est aliquam perspiciatis eum id accusantium hic sapiente! Et recusandae sed perferendis ipsum similique sunt
+        deserunt qui impedit animi aut numquam earum labore a, natus alias commodi, asperiores possimus officiis ad
+        excepturi? Assumenda, adipisci minus autem fuga, laborum voluptatum molestiae quia, vitae exercitationem eaque
+        atque iste? Ullam eius ducimus recusandae amet cumque itaque quis consequatur voluptatibus omnis! Quo.
+    </p>
+</section>
+{% endblock %}

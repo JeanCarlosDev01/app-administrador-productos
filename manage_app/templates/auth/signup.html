@@ -2,11 +2,12 @@
 {% load static %}
 
 {% block content %}
-
-{% if error %}
+{% if messages %}
+{% for message in messages  %}
 <div class="m-auto col-5 mt-2 alert alert-danger" role="alert">
-  {{ error }}
+    {{ message }}
 </div>
+{% endfor %}
 {% endif %}
 
 <h1 class="text-center mt-2">Registrar</h1>

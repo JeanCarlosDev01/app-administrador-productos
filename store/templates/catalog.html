@@ -1,0 +1,76 @@
+{% extends 'store_base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="row p-2 bg-body-tertiary">
+    <form method="post" id="search-form" class="d-flex flex-row">
+        {% csrf_token %}
+        <div class="col-6 p-1 d-flex flex-row justify-content-between">
+            <div class="w-50 p-2">
+                <p class="text-center mb-1">Filtrar por categoria</p>
+                <select class="form-select px-5 mb-3" name="category" id="inputGroupSelectCategory" required>
+                    <option value="0">Todos</option>
+                    {% for category in categories %}
+                    <option value="{{ category.id }}">{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="w-50 p-2">
+                <p class="text-center mb-1">Filtrar por precio</p>
+                <div class="d-flex flex-row justify-content-center">
+                    <div class="w-50">
+                        <p for="minorPrice" class="text-start p-0 m-0">Menor</p>
+                        <input type="range" name="min-price" class="form-range w-100" id="minorPrice"
+                            value="{{ range_min.min }}" step="1" min="{{ range_min.min }}" max="{{ range_min.max }}">
+                    </div>
+                    <div class="w-50">
+                        <p for="major" class="text-end p-0 m-0">Mayor</p>
+                        <input type="range" name="max-price" class="form-range w-100" id="majorPrice"
+                            value="{{ range_max.max }}" step="1" min="{{ range_max.min }}" max="{{ range_max.max }}">
+                    </div>
+                </div>
+                <div class="d-flex flex-row justify-content-between">
+                    <p id="minorValue">{{ range_min.min }}</p>
+                    <p id="majorValue">{{ range_max.max }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-6 p-2">
+            <p class="text-center mb-1">Filtrar por ID/Nombre</p>
+            <div class="row d-flex justify-content-center">
+                <div class="col-9 p-0 d-flex flex-row gap-1">
+                    <input type="text" name="input-search" id="input-search" class="form-control ms-2"
+                        placeholder="ID/Nombre del producto" aria-label="Nombre" aria-describedby="addon-wrapping">
+                    <button type="submit" class="btn btn-primary" form="search-form"><i
+                            class="bi bi-search"></i></button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% if messages %}
+{% for msg in messages %}
+<div class="m-auto col-5 mt-2 alert alert-primary text-center" role="alert">
+    <i class="bi bi-info-circle"></i> {{ msg }}
+</div>
+{% endfor %}
+{% endif %}
+<section class="p-2 d-flex justify-content-center flex-wrap gap-2">
+{% if product_list %}
+{% for product in product_list %}
+    <a href="{% url 'product-info' product.id %}" target="_blank" class="card text-decoration-none" style="width: 18rem;">
+        <img src="{{ product.image }}" class="card-img-top" alt="Imgen de producto">
+        <div class="card-body">
+            <h5 class="card-title">{{ product.name }}</h5>
+        </div>
+        <ul class="list-group list-group-flush">
+            <li class="list-group-item"><strong>Categoria</strong> {{ product.category.name }}</li>
+            <li class="list-group-item"><strong>Stock</strong>  {{ product.stock }}</li>
+            <li class="list-group-item"><strong>Precio</strong>  {{ product.price }}</li>
+        </ul>
+    </a>
+    {% endfor %}
+    {% endif %}
+</section>
+<script src="{% static 'search_inputs.js' %}"></script>
+{% endblock %}

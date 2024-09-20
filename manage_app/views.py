@@ -17,70 +17,56 @@ def login(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
 
+    template_title = {"title": "Iniciar sessíon"}
+    template_url = 'auth/login.html'
+    
     if request.method == "POST":
+        user_email = request.POST["useremail"]
+        user_password = request.POST["password"]
         try:
-            user = User.objects.get(email=request.POST["username"])
-            if user.check_password(request.POST["password"]):
+            user = User.objects.get(email=user_email)
+            if user.check_password(user_password):
                 user_session(request, user)
                 return redirect("dashboard")
             else:
-                return render(
-                    request,
-                    "auth/login.html",
-                    {"title": "Iniciar sessíon", "error": "Contraseña incorrecta"},
-                )
+                messages.add_message(request, messages.ERROR, 'Contraseña incorrecta')
+                return render(request,template_url, {})
         except:
-            return render(
-                request,
-                "auth/login.html",
-                {"title": "Iniciar sessíon", "error": "No se encontro el usuario"},
-            )
-    else:
-        return render(
-            request,
-            "auth/login.html",
-            {
-                "title": "Iniciar sessíon",
-            },
-        )
+            messages.add_message(request, messages.ERROR, 'No se encontro el usuario')
+            return render(request, template_url, {})
+        
+    return render(request, template_url, template_title)
 
 
 def signup(request):
     if request.user.is_authenticated:
         return redirect("dashboard")
 
+    template_title = {"title": "Registrarse"}
+    template_url = "auth/signup.html"
+    
     if request.method == "POST":
+        user_name = request.POST["username"]
+        user_email = request.POST["email"]
+        user_password = request.POST["password"]
         try:
-            User.objects.get(email=request.POST["email"])
-            return render(
-                request,
-                "auth/signup.html",
-                {
-                    "title": "Registrarse",
-                    "error": "El correo electronico ya esta registrado",
-                },
-            )
+            User.objects.get(email=user_email)
+            messages.add_message(request, messages.ERROR, 'El correo electronico ya esta registrado')
+            return render(request, template_url, template_title)
         except:
             try:
                 user = User.objects.create_user(
-                    username=request.POST["username"],
-                    email=request.POST["email"],
-                    password=request.POST["password"],
+                    username=user_name,
+                    email=user_email,
+                    password=user_password
                 )
-                user.save()
                 user_session(request, user)
                 return redirect("dashboard")
             except IntegrityError:
-                return render(
-                    request,
-                    "auth/signup.html",
-                    {
-                        "title": "Registrarse",
-                        "error": "El nombre de usuario no esta disponible",
-                    },
-                )
-    else:
-        return render(request, "auth/signup.html", {"title": "Registrarse"})
+                messages.add_message(request, messages.ERROR, 'El nombre de usuario no esta disponible')
+                return render(request,template_url, template_title)
+    
+    return render(request, template_url, template_title)
 
 
 @login_required(login_url="login")
@@ -91,45 +77,39 @@ def close_session(request):
 
 @login_required(login_url="login")
 def index_dashboard(request):
-
-    total_products = Product.objects.filter(user_id=request.user).count()
-    min_price = Product.objects.filter(user_id=request.user).aggregate(Min('price'))
-    max_price = Product.objects.filter(user_id=request.user).aggregate(Max('price'))
+    active_user = request.user
+    user_products = Product.objects.filter(user_id=active_user)
+    total_products = user_products.count()
+    min_price = user_products.aggregate(Min('price'))['price__min'] if user_products.aggregate(Min('price'))['price__min'] else 0
+    max_price = user_products.aggregate(Max('price'))['price__max'] if user_products.aggregate(Max('price'))['price__max'] else 0
     
-    try:
-        min_price_format = format_price(min_price['price__min'])
-        max_price_format = format_price(max_price['price__max'])
-    except:
-        min_price_format = 0
-        max_price_format = 0
+    min_price_format = format_price(min_price)
+    max_price_format = format_price(max_price)
     
     categories = Category.objects.all()
     categories_data = list()
     for category in categories:
-        pr_category = Product.objects.filter(category_id=category.id, user_id=request.user).count()
-        data = {
+        pr_category = user_products.filter(category_id=category.id).count()
+        category_data = {
             'name' : category.name,
-            'total_products' : pr_category
+            'total_products': pr_category
         }
-        categories_data.append(data)
+        categories_data.append(category_data)
         
-    return render(request, "account/user_statistics.html", 
-                    {"title": f"{request.user} | Dashboard",
-                    "username": request.user,
-                    'total_products' : total_products,
-                    'min_price' : min_price_format,
-                    'max_price' : max_price_format,
-                    'categories' : categories_data
-                    })
-
+    context = {'title': f'{request.user} | Dashboard',
+                'username': request.user,
+                'total_products': total_products,
+                'min_price': min_price_format,
+                'max_price': max_price_format,
+                'categories': categories_data
+                }
+    
+    return render(request, "account/user_statistics.html", context)
 
 @login_required(login_url="login")
 def account_settings(request):
-    try:
-        user = User.objects.get(id=request.user.id)
-    except:
-        return HttpResponse("<h1>NO SE ENCONTRO EL USUARIO<h2>")
-
+    user = User.objects.get(id=request.user.id)
+    
     if request.method == "POST":
         user.username = request.POST["username"]
         user.first_name = request.POST["firstname"]
@@ -137,31 +117,24 @@ def account_settings(request):
         user.save()
         return redirect("dashboard")
 
-    return render(
-        request,
-        "account/account_settings.html",
-        {
-            "username": user.username,
-            "firstname": user.first_name,
-            "lastname": user.last_name,
-            "email": user.email,
-        },
-    )
+    context = {"username": user.username,
+                "firstname": user.first_name,
+                "lastname": user.last_name,
+                "email": user.email
+                }
+
+    return render(request, "account/account_settings.html", context)
 
 
 @login_required(login_url="login")
 @require_http_methods(["POST"])
 def changue_password(request):
-    try:
-        user = User.objects.get(id=request.user.id)
-    except:
-        return HttpResponse("<h1>NO SE ENCONTRO EL USUARIO<h2>")
+    user = User.objects.get(id=request.user.id)
 
     user.set_password(request.POST["password"])
     user.save()
     logout(request)
     return redirect("login")
-
 
 @login_required(login_url="login")
 def create_new_product(request):
@@ -169,49 +142,42 @@ def create_new_product(request):
     if len(categories) == 0:
         categories = [{"id": 0, "name": "No hay categorias registradas"}]
 
+    context = {"categories": categories}
+    template_url = "account/add_product.html"
+    
     if request.method == "POST":
         try:
             category = Category.objects.get(id=int(request.POST['category']))
-            new_product = Product(
+            new_product = Product.objects.create(
                 name=request.POST['name'],
                 category=category,
                 stock=int(request.POST['stock']),
-                price=(request.POST['price']),
+                price=int(request.POST['price']),
                 user=request.user
             )
-            new_product.save()
 
             url_images = request.POST['images'].split(',')
             for url in url_images:
                 if url != '':
-                    product_image = ProductImages(
-                        url=url,
-                        product=new_product)
-                    product_image.save()
+                    ProductImages.objects.create(url=url, product=new_product)
 
-            product_description = Description(
-                description=request.POST['description'],
-                product=new_product
-            )
-            product_description.save()
-
-            messages.add_message(request, messages.INFO,
-                                 'El producto se registro exitosamente')
-            return render(request, "account/add_product.html", {"categories": categories})
+            Description.objects.create(description=request.POST['description'], product=new_product)
+            
+            messages.add_message(request, messages.INFO, 'El producto se registro exitosamente')
+            return render(request, template_url, context)
         except:
             messages.add_message(
                 request, messages.INFO, 'No se pudo registrar el prodcto, verifica la información')
-            return render(request, "account/add_product.html", {"categories": categories})
+            return render(request, template_url, context)
 
-    return render(request, "account/add_product.html", {"categories": categories})
+    return render(request, template_url, context)
 
 
 @login_required(login_url="login")
 @require_http_methods(["POST"])
 def add_category(request):
     try:
-        new_category = Category(name=request.POST["category"])
-        new_category.save()
+        Category.objects.create(name=request.POST["category"])
         messages.add_message(request, messages.INFO, 'Se creo la categoria')
         return redirect("add-product")
     except:
@@ -222,24 +188,22 @@ def add_category(request):
 @login_required(login_url='login')
 @require_http_methods(["GET"])
 def get_products(request):
+    template_url = 'account/product_list.html'
     try:
-        product_list = list(Product.objects.filter(user=request.user.id))
-        return render(request, 'account/product_list.html', {'product_list': product_list})
+        product_list = list(Product.objects.filter(user=request.user))
+        return render(request, template_url, {'product_list': product_list})
     except:
-        messages.add_message(request, messages.INFO,
-                             'No de pudo encontrar los productos')
-        return render(request, 'account/product_list.html')
+        messages.add_message(request, messages.INFO, 'No de pudo encontrar los productos')
+        return render(request, template_url)
 
 
 @login_required(login_url='login')
 def delete_product(request, id):
     try:
-        product = Product.objects.get(id=id)
-        product.delete()
+        Product.objects.get(id=id).delete()
         messages.add_message(request, messages.INFO, 'Producto eliminado')
     except:
-        messages.add_message(request, messages.INFO,
-                             'No se encontro el producto')
+        messages.add_message(request, messages.INFO,'No se encontro el producto')
 
     return redirect('product-list')
 
@@ -248,32 +212,30 @@ def delete_product(request, id):
 @require_http_methods(["GET", "POST"])
 def edit_product(request, id=None):
     if id is None:
-        messages.add_message(request, messages.INFO,
-                            'No se identifico el ID el producto')
+        messages.add_message(request, messages.INFO, 'No se identifico el ID el producto')
         return redirect('product-list')
-
+    
+    try:
+        product = Product.objects.get(id=id)
+        categories = Category.objects.all()
+        images = ProductImages.objects.filter(product_id=id)
+        description = Description.objects.get(product_id=id)
+    except:
+        messages.add_message(request, messages.INFO,
+                            'No se pudo cargar el producto')
+        return redirect('product-list')
+        
     if request.method == 'GET':
-        try:
-            product = Product.objects.get(id=id)
-            categories = Category.objects.all().values()
-            images = ProductImages.objects.filter(product_id=id).values()
-            description = Description.objects.get(product_id=id)
-
-            return render(request, 'account/edit_product.html', {
-                'product': product,
-                'categories': categories,
-                'description': description,
-                'images': images,
-                'input_imgs': join_urls(images)
-            })
-        except:
-            messages.add_message(request, messages.INFO,
-                                'No se pudo cargar el producto')
-            return redirect('product-list')
+        return render(request, 'account/edit_product.html', {
+            'product': product,
+            'categories': categories.values(),
+            'description': description,
+            'images': images.values(),
+            'input_imgs': join_urls(images)
+        })
 
     try:
         new_category = Category.objects.get(id=int(request.POST['category']))
-        product = Product.objects.get(id=id)
         product.name = request.POST['name']
         product.category = new_category
         product.stock = int(request.POST['stock'])
@@ -281,27 +243,20 @@ def edit_product(request, id=None):
         product.user = request.user
         product.save()
 
-        images = ProductImages.objects.filter(product_id=product.id).delete()
+        images.delete()
         url_images = request.POST['images'].split(',')
         for url in url_images:
             if url != '':
-                product_image = ProductImages(
-                    url=url,
-                    product=product)
-                product_image.save()
+                ProductImages.objects.create(url=url, product=product)
 
-        description = Description.objects.get(product_id=product.id)
         description.description = request.POST['description']
         description.save()
 
-        messages.add_message(request, messages.INFO,
-                             'El producto se actualizo exitosamente')
+        messages.add_message(request, messages.INFO, 'El producto se actualizo exitosamente')
         return redirect('product-list')
     except:
-        messages.add_message(request, messages.INFO,
-                             'Error al actualizar el producto')
+        messages.add_message(request, messages.INFO, 'Error al actualizar el producto')
         return redirect('product-list')
-
 
 @login_required(login_url='login')
 @require_http_methods(["GET"])
@@ -315,59 +270,61 @@ def product_details(request, id=None):
     description = Description.objects.get(product_id=product)
     images = list(ProductImages.objects.filter(product_id=product).values())
     
-    if len(images) <= 0:
+    if len(images) == 0:
         act_image = False
         images = False
+    elif len(images) == 1:
+        act_image = images[0]
     else:
         act_image = images[0]
-        images.pop(0)
+        images.pop()  
     
-    
-
-    return render(request, 'account/details_product.html', {
+    context = {
         'product': product,
         'product_price': format_price(product.price),
         'description': description,
         'active_image' : act_image,
         'images': images
-    })
-
+    }
+    return render(request, 'account/details_product.html', context)
 
 @login_required(login_url='login')
 def search_product(request):
+    active_user = request.user
+    user_products = Product.objects.filter(user_id=active_user)
+    
+    template_url = 'account/search_product.html'
+    
     try:
         categories = Category.objects.all().values()
-
-        min_price = Product.objects.filter(
-            user_id=request.user).aggregate(Min('price'))
-        max_price = Product.objects.filter(
-            user_id=request.user).aggregate(Max('price'))
+        min_price = user_products.aggregate(Min('price'))['price__min']
+        max_price = user_products.aggregate(Max('price'))['price__max']
 
         range_min = {
-            'min': min_price['price__min'],
-            'max': (min_price['price__min'] + max_price['price__max']) / 2
+            'min': min_price,
+            'max': (min_price + max_price) / 2
         }
         range_max = {
-            'min': (min_price['price__min'] + max_price['price__max']) / 2,
-            'max': max_price['price__max'],
+            'min': (min_price + max_price) / 2,
+            'max': max_price,
         }
     except:
         messages.add_message(request, messages.INFO, 'No hay productos registrados')
-        return render(request, 'account/search_product.html')
+        return render(request, template_url)
 
-    if request.method == 'GET':
-        return render(request, 'account/search_product.html', {
+    context = {
             'categories': categories,
             'range_min': range_min,
             'range_max': range_max
-        })
+        }
+
+    if request.method == 'GET':
+        return render(request, template_url, context)
     
     req_min_price = int(request.POST['min-price'])
     req_max_price = int(request.POST['max-price'])
     req_category = request.POST['category']
     req_input_search = request.POST['input-search']
-    
-    user_products = Product.objects.filter(user_id=request.user)
     
     products = user_products.filter(price__range=(req_min_price, req_max_price))
     
@@ -382,15 +339,7 @@ def search_product(request):
         
     if len(products) == 0:
         messages.add_message(request, messages.INFO, 'No se encontraron productos')
-        return render(request, 'account/search_product.html', {
-            'categories': categories,
-            'range_min': range_min,
-            'range_max': range_max,
-    })
+        return render(request, template_url, context)
 
-    return render(request, 'account/search_product.html', {
-        'categories': categories,
-        'range_min': range_min,
-        'range_max': range_max,
-        'product_list' : products
-    })
+    context['product_list'] = products
+    return render(request, template_url, context)

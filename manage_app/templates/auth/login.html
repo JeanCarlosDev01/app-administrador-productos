@@ -2,10 +2,12 @@
 {% load static %}
 
 {% block content %}
-{% if error %}
+{% if messages %}
+{% for message in messages  %}
 <div class="m-auto col-5 mt-2 alert alert-danger" role="alert">
-    {{ error }}
+    {{ message }}
 </div>
+{% endfor %}
 {% endif %}
 
 <h1 class="text-center mt-5">Iniciar sesión</h1>
@@ -16,7 +18,7 @@
             {% csrf_token %}
             <div class="mb-3">
                 <label for="email" class="form-label">Correo electrónico</label>
-                <input type="email" name="username" class="form-control" id="email" placeholder="example@email.com"
+                <input type="email" name="useremail" class="form-control" id="email" placeholder="example@email.com"
                     pattern="^[^\s@]+@[^\s@]+\.[^\s@]+$" required>
                 <div class="invalid-feedback">
                     Correo electrónico invalido
