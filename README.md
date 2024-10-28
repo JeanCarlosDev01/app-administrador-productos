@@ -21,6 +21,6 @@ Esta aplicación permite a los usuarios registrarse y agregar información adici
 * Bootstrap 5.3.3
 
 ### Despliegue
-La aplicación está actualmente desplegada en Render.com y se puede acceder temporalmente a través del siguiente enlace: *[abrir aplicación](https://productmanagement-pk4q.onrender.com/)*.
+La aplicación está actualmente desplegada en Render.com y se puede acceder temporalmente a través del siguiente enlace: *[abrir aplicación](https://app-administrador-productos.onrender.com/)*.
 
 **Nota:** La aplicación estará disponible solo durante 30 días a partir de la fecha de publicación (08/09/2024) debido a las limitaciones de la versión gratuita de Render.com.
