@@ -231,7 +231,7 @@ def edit_product(request, id=None):
             'categories': categories.values(),
             'description': description,
             'images': images.values(),
-            'input_imgs': join_urls(images)
+            'input_imgs': join_urls(images.values())
         })
 
     try:
@@ -277,7 +277,7 @@ def product_details(request, id=None):
         act_image = images[0]
     else:
         act_image = images[0]
-        images.pop()  
+        images.pop(0)  
     
     context = {
         'product': product,

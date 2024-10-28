@@ -29,7 +29,7 @@ def product_info(request, id=None):
         act_image = images[0]
     else:
         act_image = images[0]
-        images.pop()    
+        images.pop(0)    
 
     context = {
         'product': product,
