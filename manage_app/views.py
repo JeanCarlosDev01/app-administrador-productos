@@ -166,6 +166,7 @@ def create_new_product(request):
             try:
                 Description.objects.create(description=request.POST['description'], product=new_product)
             except:
+                Description.objects.create(description='No hay descripcion para este producto.', product=new_product)
                 message = 'No se agrego la descripcion del producto, verifica el texto'
             
             messages.add_message(request, messages.INFO, message)
@@ -273,10 +274,7 @@ def product_details(request, id=None):
 
     product = Product.objects.get(id=id)
     
-    try:
-        description = Description.objects.get(product_id=product)
-    except:
-        description = 'No hay descipcion para este producto'
+    description = Description.objects.get(product_id=product).description
         
     images = list(ProductImages.objects.filter(product_id=product).values())
     

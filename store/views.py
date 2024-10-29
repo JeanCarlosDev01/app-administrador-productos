@@ -20,10 +20,8 @@ def product_info(request, id=None):
 
     product = Product.objects.get(id=id)
     
-    try:
-        description = Description.objects.get(product_id=product)
-    except:
-        description = 'No hay descipcion para este producto'
+    description = Description.objects.get(product_id=product).description
+
         
     images = list(ProductImages.objects.filter(product_id=product).values())
     
