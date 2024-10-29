@@ -146,6 +146,8 @@ def create_new_product(request):
     template_url = "account/add_product.html"
     
     if request.method == "POST":
+        message = 'El producto se registro exitosamente'
+        
         try:
             category = Category.objects.get(id=int(request.POST['category']))
             new_product = Product.objects.create(
@@ -161,9 +163,12 @@ def create_new_product(request):
                 if url != '':
                     ProductImages.objects.create(url=url, product=new_product)
 
-            Description.objects.create(description=request.POST['description'], product=new_product)
+            try:
+                Description.objects.create(description=request.POST['description'], product=new_product)
+            except:
+                message = 'No se agrego la descripcion del producto, verifica el texto'
             
-            messages.add_message(request, messages.INFO, 'El producto se registro exitosamente')
+            messages.add_message(request, messages.INFO, message)
             return render(request, template_url, context)
         except:
             messages.add_message(
@@ -267,7 +272,12 @@ def product_details(request, id=None):
         return redirect('product-list')
 
     product = Product.objects.get(id=id)
-    description = Description.objects.get(product_id=product)
+    
+    try:
+        description = Description.objects.get(product_id=product)
+    except:
+        description = 'No hay descipcion para este producto'
+        
     images = list(ProductImages.objects.filter(product_id=product).values())
     
     if len(images) == 0:

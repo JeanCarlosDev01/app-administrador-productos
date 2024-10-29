@@ -19,7 +19,12 @@ def product_info(request, id=None):
         return redirect('catalog')
 
     product = Product.objects.get(id=id)
-    description = Description.objects.get(product_id=product)
+    
+    try:
+        description = Description.objects.get(product_id=product)
+    except:
+        description = 'No hay descipcion para este producto'
+        
     images = list(ProductImages.objects.filter(product_id=product).values())
     
     if len(images) == 0:
