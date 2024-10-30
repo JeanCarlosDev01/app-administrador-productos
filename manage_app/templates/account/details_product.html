@@ -5,18 +5,18 @@
 <div class="row">
     <div class="col-12 col-md-5 border-end">
         <div id="carouselExampleInterval" class="carousel slide carousel-dark slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
+            <div class="carousel-inner" style="height: 70vh;">
             {% if images %}
                 <div class="carousel-item active">
-                    <img src="{{ active_image.url }}" class="d-block w-100 custom-carousel-img" alt="...">
+                    <img src="{{ active_image.url }}" class="d-block h-100 w-100 custom-carousel-img object-fit-cover" alt="...">
                 </div>
                 {% for image in images %}
                     <div class="carousel-item">
-                        <img src="{{ image.url }}" class="d-block w-100 custom-carousel-img" alt="...">
+                        <img src="{{ image.url }}" class="d-block h-100 w-100 custom-carousel-img object-fit-cover" alt="...">
                     </div>
                 {% endfor %}
             {% else %}
-                <img src="{% static 'imgs/image_not_found.png' %}" class="img-fluid" alt="image not found">
+                <img src="{% static 'imgs/image_not_found.png' %}" class="img-fluid h-100 w-100 object-fit-cover" alt="image not found">
             {% endif %}
             </div>
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleInterval"
