@@ -49,7 +49,10 @@ def search_product(request, category=None):
         products = list(Product.objects.filter(category_id=category).values())
         for product in products:
             image = ProductImages.objects.filter(product_id=product['id']).first()
-            product['image'] = image.url
+            if image is None:
+                product['image'] = 'https://salonlfc.com/wp-content/uploads/2018/01/image-not-found-scaled-1150x647.png'
+            else:
+                product['image'] = image.url
 
     template_name = 'catalog.html'
     
