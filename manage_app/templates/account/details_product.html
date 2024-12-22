@@ -1,11 +1,12 @@
 {% extends 'account/dashboard.html' %}
 {% load static %}
+{% load format_price %}
 
 {% block section %}
 <div class="row">
     <div class="col-12 col-md-5 border-end">
         <div id="carouselExampleInterval" class="carousel slide carousel-dark slide" data-bs-ride="carousel">
-            <div class="carousel-inner" style="height: 70vh;">
+            <div class="carousel-inner" style="height: 50vh;">
             {% if images %}
                 <div class="carousel-item active">
                     <img src="{{ active_image.url }}" class="d-block h-100 w-100 custom-carousel-img object-fit-cover" alt="...">
@@ -40,7 +41,7 @@
             {{ product.create_date }}</p>
         <p class="text-black fs-5"><span class="text-secondary">Categoria: </span>{{ product.category.name }}</p>
         <p class="text-black fs-5"><span class="text-secondary">Stock: </span>{{ product.stock }}</p>
-        <p class="text-black fs-5"><span class="text-secondary">Precio: </span>{{ product_price }}</p>
+        <p class="text-black fs-5"><span class="text-secondary">Precio: </span>{{ product.price|format_price }}</p>
         <div class="d-flex flex-row">
             <a href="{% url 'product-edit' product.id %}" class="mx-1 btn btn-success" title="Editar"><i
                     class="bi bi-pencil-square"></i></a>

@@ -1,6 +1,3 @@
-def format_price(price):
-    return f"{price:,}".replace(",", ".")
-
 def join_urls(list):
     concat_url = ''
     for image in list:

@@ -1,12 +1,13 @@
 {% extends 'store_base.html' %}
 {% load static %}
+{% load format_price %}
 
 {% block content %}
 <main class="container">
     <div class="row shadow-sm m-2 bg-body-tertiary rounded">
-        <div class="col-12 col-md-4 border-end">
+        <div class="col-12 col-md-4 border-end p-2">
             <div id="carouselExampleInterval" class="carousel slide carousel-dark slide" data-bs-ride="carousel">
-                <div class="carousel-inner" style="height: 70vh;">
+                <div class="carousel-inner" style="height: 50vh;">
                 {% if images %}
                     <div class="carousel-item active">
                         <img src="{{ active_image.url }}" class="d-block h-100 w-100 object-fit-cover custom-carousel-img" alt="...">
@@ -39,13 +40,13 @@
             <p class="text-black fw-bold fs-4">{{ product.name }}</p>
             <p class="text-black text-secondary  fs-5"><span class="text-secondary">Fecha de registro:</span> 
                 {{ product.create_date }}</p>
-            <p class="text-black fs-6"><span class="text-secondary">Categoria: </span>{{ product.category.name }}</p>
-            <p class="text-black fs-6"><span class="text-secondary">Stock: </span>{{ product.stock }}</p>
-            <p class="text-black fs-6"><span class="text-secondary">Precio: </span>{{ product_price }}</p>
+            <p class="text-black fs-5"><span class="text-secondary">Categoria: </span>{{ product.category.name }}</p>
+            <p class="text-black fs-5"><span class="text-secondary">Stock: </span>{{ product.stock }}</p>
+            <p class="text-black fs-5"><span class="text-secondary">Precio: </span>{{ product.price|format_price }}</p>
         </div>
         <div class="col-12 p-3">
             <p class="fs-4 bg-secondary-subtle text-center py-2 fw-bold">Descripción</p>
-            <div class="fs-6">{{ description|safe }}</div>
+            <div><p class="fs-3">{{ description|safe }}</p></div>
         </div>
     </div>
 </main>

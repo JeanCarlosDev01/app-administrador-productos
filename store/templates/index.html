@@ -1,5 +1,6 @@
 {% extends 'store_base.html' %}
 {% load static %}
+{% load format_price %}
 
 {% block content %}
 <link rel="stylesheet" href="{% static 'css/store-styles.css' %}">
@@ -16,26 +17,41 @@
         </div>
     </form>
 </section>
-<section class="container py-5">
-    <h1 class="text-center">Categorias</h1>
-    <div class="d-flex flex-wrap justify-content-center pt-2">
-        {% for category in categories %}
-        <div class="card m-2 p-2 text-center shadow-sm" style="width: 18rem;">
-            <a href="{% url 'search-category' category.id %}" class="text-decoration-none fw-bold text-secondary">{{ category.name }}</a>
+<section class="container-fluid">
+    <div class="row">
+        <div class="col-4 bg-light py-3">
+            <h4 class="text-center">Categorias</h4>
+                {% for category in categories %}
+                <a class="py-2 border-top d-flex justify-content-between align-items-center link-offset-2 link-underline link-underline-opacity-0" href="{% url 'search-category' category.category_id %}">
+                    <span class="text-secondary">{{ category.category }}</span>
+                    <div class="badge text-bg-primary rounded-pill">{{ category.number_of_products }}</div>
+                </a>
+                {% endfor %}
         </div>
-        {% endfor %}
+        <div class="col-8 px-2">
+            {% if product_list %}
+            {% for product in product_list %}
+                <div class="d-flex bg-white shadow-sm rounded-1 mt-2">
+                    <div class="">
+                        <img src="{{ product.image }}" class="object-fit-contain" width="150px" height="150px" alt="Imgen de producto">
+                    </div>
+                    <div class="w-100 p-2">
+                        <a href="{% url 'product-info' product.id %}" target="_blank" class="fs-4 link-offset-2 link-underline link-underline-opacity-0 text-black">{{ product.name }}</a>
+                        <div class="d-flex justify-content-between pe-3">
+                            <div>
+                                <p>{{ product.create_date }}</p>
+                                <p>{{ product.category.name }}</p>
+                                <p><strong>Stock: </strong>{{ product.stock }}</p>
+                            </div>
+
+                            <p class="fs-5">$ {{ product.price|format_price }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+            {% endif %}
+        </div>
     </div>
 </section>
-<section class="container pb-5">
-    <h2 class="text-center">Sobre nosotros</h2>
-    <p class="mt-4 text-center">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Reprehenderit, hic adipisci. Assumenda, blanditiis
-        aspernatur accusantium alias quae voluptatum, aliquam enim eveniet expedita sed doloremque rerum excepturi
-        itaque. Vitae dolorem maiores laudantium fuga saepe aut eligendi rerum nulla, omnis obcaecati totam quaerat esse
-        est aliquam perspiciatis eum id accusantium hic sapiente! Et recusandae sed perferendis ipsum similique sunt
-        deserunt qui impedit animi aut numquam earum labore a, natus alias commodi, asperiores possimus officiis ad
-        excepturi? Assumenda, adipisci minus autem fuga, laborum voluptatum molestiae quia, vitae exercitationem eaque
-        atque iste? Ullam eius ducimus recusandae amet cumque itaque quis consequatur voluptatibus omnis! Quo.
-    </p>
-</section>
+
 {% endblock %}

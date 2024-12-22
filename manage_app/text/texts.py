@@ -1,0 +1,22 @@
+ERROR_PASSWORD = 'Contraseña incorrecta'
+USER_NOT_FOUND = 'No se encontro el usuario'
+EMAIL_IS_ALREADY_IN_USE = 'El correo electronico ya esta registrado'
+USERNAME_IS_ALREADY_IN_USE = 'El nombre de usuario no esta disponible'
+
+SUCCESSFULLY_CREATED_CATEGORY = 'Se creo la categoria'
+ERROR_NO_CATEGORY_CREATED = 'No se creo la categoria'
+NO_CATEGORIES_FOUND = 'No hay categorias registradas'
+
+PRODUCT_SUCCESSFULLY_REGISTERED = 'El producto se registro exitosamente'
+ERROR_PRODUCT_NO_REGISTERED = 'No se pudo registrar el prodcto, verifica la información'
+ERROR_PRODUCT_ID = 'No se identifico el ID el producto'
+ERROR_LOADING_PRODUCT = 'No se pudo cargar el producto'
+PRODUCT_SUCCESSFULLY_UPDATED = 'El producto se actualizo exitosamente'
+ERROR_UPDATING_PRODUCT = 'Error al actualizar el producto'
+PRODUCT_SUCCESSFULLY_REMOVED = 'Producto elimina do exitosamente'
+NO_PRODUCTS_REGISTERED = 'No hay productos registrados'
+PRODUCT_NOT_FOUND = 'No se encontro el producto'
+PRODUCTS_NOT_FOUND = 'No de pudo encontrar los productos'
+
+DEFAULT_PRODUCT_DESCRIPTION = 'No hay descripcion para este producto.'
+ERROR_ADDING_DESCRIPTIION = 'No se agrego la descripcion del producto, verifica el texto'

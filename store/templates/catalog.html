@@ -1,5 +1,6 @@
 {% extends 'store_base.html' %}
 {% load static %}
+{% load format_price %}
 
 {% block content %}
 <div class="row p-2 bg-body-tertiary">
@@ -58,7 +59,7 @@
 <section class="p-2 d-flex justify-content-center flex-wrap gap-2">
 {% if product_list %}
 {% for product in product_list %}
-    <a href="{% url 'product-info' product.id %}" target="_blank" class="card text-decoration-none overflow-hidden" style="width: 18rem; max-height: 450px">
+    <a href="{% url 'product-info' product.id %}" target="_blank" class="card text-decoration-none overflow-hidden shadow-sm" style="width: 18rem; max-height: 450px">
         <img src="{{ product.image }}" class="card-img-top object-fit-cover h-50" alt="Imgen de producto">
         <div class="card-body p-2 m-0">
             <h5 class="card-title">{{ product.name }}</h5>
@@ -66,7 +67,7 @@
         <ul class="list-group list-group-flush">
             <li class="list-group-item"><strong>Categoria</strong> {{ product.category.name }}</li>
             <li class="list-group-item"><strong>Stock</strong>  {{ product.stock }}</li>
-            <li class="list-group-item"><strong>Precio</strong>  {{ product.price }}</li>
+            <li class="list-group-item"><strong>Precio</strong> $ {{ product.price|format_price }}</li>
         </ul>
     </a>
     {% endfor %}

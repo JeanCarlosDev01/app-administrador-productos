@@ -9,7 +9,7 @@
             {% csrf_token %}
             <div class="">
                 <label for="username" class="form-label text-center">Nombre de usuario</label>
-                <input type="text" name="username" class="form-control" value="{{ username }}"
+                <input type="text" name="username" class="form-control" value="{{ user.username }}"
                     pattern="^(?=.*[a-zA-Z]{3,})[a-zA-Z\d]{3,}$" id="username"" placeholder=" Nombre de usuario"
                     required>
                 <div class="invalid-feedback">
@@ -18,7 +18,7 @@
             </div>
             <div class="">
                 <label for="firstname" class="form-label text-center">Nombre</label>
-                <input type="text" name="firstname" class="form-control" value="{{ firstname }}"
+                <input type="text" name="firstname" class="form-control" value="{{ user.first_name }}"
                     pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$" id="firstname" placeholder="EJ: Juan Pablo" required>
                 <div class="invalid-feedback">
                     No agregar numeros ni caracteres especiales
@@ -26,7 +26,7 @@
             </div>
             <div class="">
                 <label for="lastname" class="form-label text-center">Apellido</label>
-                <input type="text" name="lastname" class="form-control" value="{{ lastname }}"
+                <input type="text" name="lastname" class="form-control" value="{{ user.last_name }}"
                     pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$" id="lastname" placeholder="Ej: Martinez Torres" required>
                 <div class="invalid-feedback">
                     No agregar numeros ni caracteres especiales
@@ -34,7 +34,7 @@
             </div>
             <div class="">
                 <label for="email" class="form-label">Correo electrónico</label>
-                <input type="email" name="email" class="form-control" disabled id="email" value="{{ email }}">
+                <input type="email" name="email" class="form-control" disabled id="email" value="{{ user.email }}">
             </div>
             <input type="submit" class="w-100 btn btn-primary mt-3" id="btn-submit" value="Agregar">
         </form>

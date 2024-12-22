@@ -1,5 +1,6 @@
 {% extends 'account/dashboard.html' %}
 {% load static %}
+{% load format_price %}
 
 {% block section %}
 {% if messages %}
@@ -22,11 +23,11 @@
             <div class="d-flex flex-row justify-content-between gap-2">
                 <div class="p-1">
                     <p class="text-center text-secondary fs-5 m-0">Mas bajo</p>
-                    <p class="text-center fs-3">{{ min_price }}</p>
+                    <p class="text-center fs-3">$ {{ min_price|format_price }}</p>
                 </div>
                 <div class="p-1">
                     <p class="text-center text-secondary fs-5 m-0">Mas alto</p>
-                    <p class="text-center fs-3">{{ max_price }}</p>
+                    <p class="text-center fs-3">$ {{ max_price|format_price }}</p>
                 </div>
             </div>
         </div>
@@ -35,14 +36,14 @@
         <thead>
             <tr>
                 <th scope="col">Categoria</th>
-                <th scope="col">Productos</th>
+                <th scope="col">Total productos</th>
             </tr>
         </thead>
         <tbody>
             {% for category in categories %}
             <tr>
-                <td>{{ category.name }}</td>
-                <td>{{ category.total_products }}</td>
+                <td>{{ category.category }}</td>
+                <td>{{ category.number_of_products }}</td>
             </tr>
             {% endfor %}
 </main>

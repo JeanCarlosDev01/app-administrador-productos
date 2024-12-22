@@ -14,5 +14,5 @@ urlpatterns = [
     path('dashboard/product-delete/<int:id>', delete_product, name='product-delete'),
     path('dashboard/product-edit/<int:id>', edit_product, name='product-edit'),
     path('dashboard/product-details/<int:id>', product_details, name='product-details'),
-    path('dashboard/product-search', search_product, name='product-search')
+    path('dashboard/product-search/', search_product, name='product-search')
 ]

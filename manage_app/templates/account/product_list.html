@@ -1,5 +1,6 @@
 {% extends 'account/dashboard.html' %}
 {% load static %}
+{% load format_price %}
 
 {% block section %}
 {% if messages %}
@@ -29,7 +30,7 @@
             <td>{{ product.name }}</td>
             <td>{{ product.category.name }}</td>
             <td>{{ product.stock }}</td>
-            <td>{{ product.price }}</td>
+            <td>$ {{ product.price|format_price }}</td>
             <td class="d-flex flex-row">
                 <a href="{% url 'product-details' product.id %}" class="mx-1 btn btn-primary" title="Detalles"><i class="bi bi-info-square"></i></i></a>
                 <a href="{% url 'product-edit' product.id %}" class="mx-1 btn btn-success" title="Editar"><i class="bi bi-pencil-square"></i></a>
@@ -42,6 +43,7 @@
     </tbody>
 </table>
 
+{% include "components/paginator.html" %}
 <!-- Modal -->
 <div class="modal fade" id="confirmDelete" tabindex="-1" aria-labelledby="confirmDelete" aria-hidden="true">
     <div class="modal-dialog">

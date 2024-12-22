@@ -1,0 +1,11 @@
+<div class="d-flex justify-content-center align-items-center">
+    {% if product_list.has_previous %}
+    <a href="?page={{ product_list.previous_page_number }}" class="px-2 py-1 border border-end-0 text-secondary link-offset-2 link-underline link-underline-opacity-0">anterior</a>
+    {% endif %}
+
+    <span class="px-2 py-1 border">{{ product_list.number }} de {{ product_list.paginator.num_pages }}</span>
+
+    {% if product_list.has_next %}
+    <a href="?page={{ product_list.next_page_number }}" class="px-2 py-1 border border-start-0 text-secondary link-offset-2 link-underline link-underline-opacity-0">siguiente</a>
+    {% endif %}
+</div>

@@ -1,57 +1,66 @@
-from django.db.models import Min, Max
+from unicodedata import category
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import login as user_session, logout
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_http_methods
-from django.http import HttpResponse
 from django.db import IntegrityError
 from django.contrib import messages
 
+from django.core.paginator import Paginator
+
+from manage_app.utils import get_max_min_price, get_product_details
+
+from .utils.search_products import search_products
+from store.utils.products_by_category import products_by_category
+
 from .models import *
 
-from .utils import *
+from .utils.join_urls import join_urls
+from .templatetags.format_price import format_price
+
+from .text import texts
 # Create your views here.
 
 def login(request):
     if request.user.is_authenticated:
-        return redirect("dashboard")
+        return redirect('dashboard')
 
-    template_title = {"title": "Iniciar sessíon"}
+    template_title = {'title': 'Iniciar sessíon'}
     template_url = 'auth/login.html'
     
-    if request.method == "POST":
-        user_email = request.POST["useremail"]
-        user_password = request.POST["password"]
+    if request.method == 'POST':
+        user_email = request.POST['useremail']
+        user_password = request.POST['password']
         try:
             user = User.objects.get(email=user_email)
             if user.check_password(user_password):
                 user_session(request, user)
-                return redirect("dashboard")
+                return redirect('dashboard')
             else:
-                messages.add_message(request, messages.ERROR, 'Contraseña incorrecta')
-                return render(request,template_url, {})
+                messages.add_message(request, messages.ERROR, texts.ERROR_PASSWORD)
+                return render(request,template_url)
         except:
-            messages.add_message(request, messages.ERROR, 'No se encontro el usuario')
-            return render(request, template_url, {})
+            messages.add_message(request, messages.ERROR, texts.USER_NOT_FOUND)
+            return render(request, template_url)
         
     return render(request, template_url, template_title)
 
 
 def signup(request):
     if request.user.is_authenticated:
-        return redirect("dashboard")
+        return redirect('dashboard')
 
-    template_title = {"title": "Registrarse"}
-    template_url = "auth/signup.html"
+    template_title = {'title': 'Registrarse'}
+    template_url = 'auth/signup.html'
     
-    if request.method == "POST":
-        user_name = request.POST["username"]
-        user_email = request.POST["email"]
-        user_password = request.POST["password"]
+    if request.method == 'POST':
+        user_name = request.POST['username']
+        user_email = request.POST['email']
+        user_password = request.POST['password']
         try:
             User.objects.get(email=user_email)
-            messages.add_message(request, messages.ERROR, 'El correo electronico ya esta registrado')
+            messages.add_message(request, messages.ERROR, texts.EMAIL_IS_ALREADY_IN_USE)
             return render(request, template_url, template_title)
         except:
             try:
@@ -61,40 +70,32 @@ def signup(request):
                     password=user_password
                 )
                 user_session(request, user)
-                return redirect("dashboard")
+                return redirect('dashboard')
             except IntegrityError:
-                messages.add_message(request, messages.ERROR, 'El nombre de usuario no esta disponible')
+                messages.add_message(request, messages.ERROR, texts.USERNAME_IS_ALREADY_IN_USE)
                 return render(request,template_url, template_title)
     
     return render(request, template_url, template_title)
 
 
-@login_required(login_url="login")
+@login_required(login_url='login')
 def close_session(request):
     logout(request)
-    return redirect("login")
+    return redirect('login')
 
 
-@login_required(login_url="login")
+@login_required(login_url='login')
 def index_dashboard(request):
     active_user = request.user
     user_products = Product.objects.filter(user_id=active_user)
     total_products = user_products.count()
-    min_price = user_products.aggregate(Min('price'))['price__min'] if user_products.aggregate(Min('price'))['price__min'] else 0
-    max_price = user_products.aggregate(Max('price'))['price__max'] if user_products.aggregate(Max('price'))['price__max'] else 0
     
-    min_price_format = format_price(min_price)
-    max_price_format = format_price(max_price)
+    price_range = get_max_min_price.min_max_price(user_products)
+
+    min_price_format = price_range[0]['min'] if price_range else 0
+    max_price_format = price_range[1]['max'] if price_range else 0
     
-    categories = Category.objects.all()
-    categories_data = list()
-    for category in categories:
-        pr_category = user_products.filter(category_id=category.id).count()
-        category_data = {
-            'name' : category.name,
-            'total_products': pr_category
-        }
-        categories_data.append(category_data)
+    categories_data = products_by_category()
         
     context = {'title': f'{request.user} | Dashboard',
                 'username': request.user,
@@ -104,49 +105,47 @@ def index_dashboard(request):
                 'categories': categories_data
                 }
     
-    return render(request, "account/user_statistics.html", context)
+    return render(request, 'account/user_statistics.html', context)
 
-@login_required(login_url="login")
+@login_required(login_url='login')
 def account_settings(request):
     user = User.objects.get(id=request.user.id)
     
-    if request.method == "POST":
-        user.username = request.POST["username"]
-        user.first_name = request.POST["firstname"]
-        user.last_name = request.POST["lastname"]
+    if request.method == 'POST':
+        user.username = request.POST['username']
+        user.first_name = request.POST['firstname']
+        user.last_name = request.POST['lastname']
         user.save()
-        return redirect("dashboard")
+        return redirect('dashboard')
 
-    context = {"username": user.username,
-                "firstname": user.first_name,
-                "lastname": user.last_name,
-                "email": user.email
-                }
+    context = {
+        'user' : user
+    }
 
-    return render(request, "account/account_settings.html", context)
+    return render(request, 'account/account_settings.html', context)
 
 
-@login_required(login_url="login")
-@require_http_methods(["POST"])
+@login_required(login_url='login')
+@require_http_methods(['POST'])
 def changue_password(request):
     user = User.objects.get(id=request.user.id)
 
-    user.set_password(request.POST["password"])
+    user.set_password(request.POST['password'])
     user.save()
     logout(request)
-    return redirect("login")
+    return redirect('login')
 
-@login_required(login_url="login")
+@login_required(login_url='login')
 def create_new_product(request):
     categories = Category.objects.all().values()
     if len(categories) == 0:
-        categories = [{"id": 0, "name": "No hay categorias registradas"}]
+        categories = [{'id': 0, 'name': texts.NO_CATEGORIES_FOUND}]
 
-    context = {"categories": categories}
-    template_url = "account/add_product.html"
+    context = {'categories': categories}
+    template_url = 'account/add_product.html'
     
-    if request.method == "POST":
-        message = 'El producto se registro exitosamente'
+    if request.method == 'POST':
+        message = texts.PRODUCT_SUCCESSFULLY_REGISTERED
         
         try:
             category = Category.objects.get(id=int(request.POST['category']))
@@ -166,40 +165,49 @@ def create_new_product(request):
             try:
                 Description.objects.create(description=request.POST['description'], product=new_product)
             except:
-                Description.objects.create(description='No hay descripcion para este producto.', product=new_product)
-                message = 'No se agrego la descripcion del producto, verifica el texto'
+                Description.objects.create(description=texts.DEFAULT_PRODUCT_DESCRIPTION, product=new_product)
+                message = texts.ERROR_ADDING_DESCRIPTIION
             
             messages.add_message(request, messages.INFO, message)
             return render(request, template_url, context)
         except:
             messages.add_message(
-                request, messages.INFO, 'No se pudo registrar el prodcto, verifica la información')
+                request, messages.INFO, texts.ERROR_PRODUCT_NO_REGISTERED)
             return render(request, template_url, context)
 
     return render(request, template_url, context)
 
 
-@login_required(login_url="login")
-@require_http_methods(["POST"])
+@login_required(login_url='login')
+@require_http_methods(['POST'])
 def add_category(request):
     try:
-        Category.objects.create(name=request.POST["category"])
-        messages.add_message(request, messages.INFO, 'Se creo la categoria')
-        return redirect("add-product")
+        Category.objects.create(name=request.POST['category'])
+        messages.add_message(request, messages.INFO, texts.SUCCESSFULLY_CREATED_CATEGORY)
+        return redirect('add-product')
     except:
-        messages.add_message(request, messages.INFO, 'No se creo la categoria')
-        return redirect("add-product")
+        messages.add_message(request, messages.INFO, texts.ERROR_NO_CATEGORY_CREATED)
+        return redirect('add-product')
 
 
 @login_required(login_url='login')
-@require_http_methods(["GET"])
+@require_http_methods(['GET'])
 def get_products(request):
     template_url = 'account/product_list.html'
     try:
         product_list = list(Product.objects.filter(user=request.user))
-        return render(request, template_url, {'product_list': product_list})
+        page = request.GET.get('page', 1)
+        paginator = Paginator(product_list, 10)
+        product_list = paginator.page(page)
+        
+        context = {
+            'product_list': product_list,
+            'paginator': paginator
+        }
+        
+        return render(request, template_url, context)
     except:
-        messages.add_message(request, messages.INFO, 'No de pudo encontrar los productos')
+        messages.add_message(request, messages.INFO, texts.PRODUCTS_NOT_FOUND)
         return render(request, template_url)
 
 
@@ -207,18 +215,18 @@ def get_products(request):
 def delete_product(request, id):
     try:
         Product.objects.get(id=id).delete()
-        messages.add_message(request, messages.INFO, 'Producto eliminado')
+        messages.add_message(request, messages.INFO, texts.PRODUCT_SUCCESSFULLY_REMOVED)
     except:
-        messages.add_message(request, messages.INFO,'No se encontro el producto')
+        messages.add_message(request, messages.INFO, texts.PRODUCT_NOT_FOUND)
 
     return redirect('product-list')
 
 
 @login_required(login_url='login')
-@require_http_methods(["GET", "POST"])
+@require_http_methods(['GET', 'POST'])
 def edit_product(request, id=None):
     if id is None:
-        messages.add_message(request, messages.INFO, 'No se identifico el ID el producto')
+        messages.add_message(request, messages.INFO, texts.ERROR_PRODUCT_ID)
         return redirect('product-list')
     
     try:
@@ -228,7 +236,7 @@ def edit_product(request, id=None):
         description = Description.objects.get(product_id=id)
     except:
         messages.add_message(request, messages.INFO,
-                            'No se pudo cargar el producto')
+                            texts.ERROR_LOADING_PRODUCT)
         return redirect('product-list')
         
     if request.method == 'GET':
@@ -258,42 +266,21 @@ def edit_product(request, id=None):
         description.description = request.POST['description']
         description.save()
 
-        messages.add_message(request, messages.INFO, 'El producto se actualizo exitosamente')
+        messages.add_message(request, messages.INFO, texts.PRODUCT_SUCCESSFULLY_UPDATED)
         return redirect('product-list')
     except:
-        messages.add_message(request, messages.INFO, 'Error al actualizar el producto')
+        messages.add_message(request, messages.INFO, texts.ERROR_UPDATING_PRODUCT)
         return redirect('product-list')
 
 @login_required(login_url='login')
-@require_http_methods(["GET"])
+@require_http_methods(['GET'])
 def product_details(request, id=None):
     if id is None:
         messages.add_message(request, messages.INFO,
-                            'No se identifico el ID el producto')
+                            texts.ERROR_PRODUCT_ID)
         return redirect('product-list')
 
-    product = Product.objects.get(id=id)
-    
-    description = Description.objects.get(product_id=product).description
-        
-    images = list(ProductImages.objects.filter(product_id=product).values())
-    
-    if len(images) == 0:
-        act_image = False
-        images = False
-    elif len(images) == 1:
-        act_image = images[0]
-    else:
-        act_image = images[0]
-        images.pop(0)  
-    
-    context = {
-        'product': product,
-        'product_price': format_price(product.price),
-        'description': description,
-        'active_image' : act_image,
-        'images': images
-    }
+    context = get_product_details.get_product_details(id)
     return render(request, 'account/details_product.html', context)
 
 @login_required(login_url='login')
@@ -305,19 +292,9 @@ def search_product(request):
     
     try:
         categories = Category.objects.all().values()
-        min_price = user_products.aggregate(Min('price'))['price__min']
-        max_price = user_products.aggregate(Max('price'))['price__max']
-
-        range_min = {
-            'min': min_price,
-            'max': (min_price + max_price) / 2
-        }
-        range_max = {
-            'min': (min_price + max_price) / 2,
-            'max': max_price,
-        }
+        range_min, range_max = get_max_min_price.min_max_price(user_products)
     except:
-        messages.add_message(request, messages.INFO, 'No hay productos registrados')
+        messages.add_message(request, messages.INFO, texts.NO_PRODUCTS_REGISTERED)
         return render(request, template_url)
 
     context = {
@@ -326,28 +303,25 @@ def search_product(request):
             'range_max': range_max
         }
 
-    if request.method == 'GET':
-        return render(request, template_url, context)
-    
-    req_min_price = int(request.POST['min-price'])
-    req_max_price = int(request.POST['max-price'])
-    req_category = request.POST['category']
-    req_input_search = request.POST['input-search']
-    
-    products = user_products.filter(price__range=(req_min_price, req_max_price))
-    
-    if req_category != '0':
-        products = products.filter(category_id=req_category)
+    if request.method == 'POST':
+        req_min_price = request.POST.get('min-price')
+        req_max_price = request.POST.get('max-price')
+        req_category = request.POST.get('category')
+        req_input_search = request.POST.get('input-search')
+    else:
+        req_min_price = range_min['min']
+        req_max_price = range_max['max']
+        req_category = '0'
+        req_input_search = ''
+
+    product_list = search_products(user_products, req_min_price, req_max_price, req_category, req_input_search)
+    page = request.GET.get('page', 1)   
+    paginator = Paginator(product_list, 10)
+    product_list = paginator.page(page)
         
-    if req_input_search != '':
-        try:
-            products = products.filter(id=int(req_input_search))
-        except:
-            products = products.filter(name__icontains=req_input_search)
-        
-    if len(products) == 0:
-        messages.add_message(request, messages.INFO, 'No se encontraron productos')
+    if len(product_list) == 0:
+        messages.add_message(request, messages.INFO, texts.PRODUCTS_NOT_FOUND)
         return render(request, template_url, context)
 
-    context['product_list'] = products
+    context['product_list'] = product_list
     return render(request, template_url, context)
