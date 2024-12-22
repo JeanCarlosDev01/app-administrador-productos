@@ -7,7 +7,7 @@ from django.views.decorators.http import require_http_methods
 from django.db import IntegrityError
 from django.contrib import messages
 
-from django.core.paginator import Paginator
+from django.core.paginator import Paginator, EmptyPage
 
 from manage_app.utils import get_max_min_price, get_product_details
 
@@ -315,10 +315,13 @@ def search_product(request):
         req_input_search = ''
 
     product_list = search_products(user_products, req_min_price, req_max_price, req_category, req_input_search)
-    page = request.GET.get('page', 1)   
+    page = request.GET.get('page', 1)
     paginator = Paginator(product_list, 10)
-    product_list = paginator.page(page)
-        
+    try:
+        product_list = paginator.page(page)
+    except EmptyPage:
+        product_list = paginator.page(paginator.num_pages)
+            
     if len(product_list) == 0:
         messages.add_message(request, messages.INFO, texts.PRODUCTS_NOT_FOUND)
         return render(request, template_url, context)
