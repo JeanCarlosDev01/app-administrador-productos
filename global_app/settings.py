@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', default='productmanagmentapp')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = []
 
@@ -83,7 +83,7 @@ WSGI_APPLICATION = 'global_app.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default= 'mysql://jeandev:railwaytest12@localhost:3306/railway',
+        default= 'sqlite:///db.sqlite3',
         conn_max_age=600
     )
 }
